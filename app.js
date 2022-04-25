@@ -1,7 +1,9 @@
 'use strict';
 let sectionEl= document.getElementById("cardSection");
+let formEl = document.getElementById("formID");
 console.log(sectionEl);
 let allDrinks=[];
+let tableEl = document.getElementById("tableID");
 function Drink (name,ingredients,image,isCold,isHot,price){
     this.name=name;
     this.ingredients=ingredients;
@@ -10,6 +12,18 @@ function Drink (name,ingredients,image,isCold,isHot,price){
     this.isHot=isHot;
     this.price=price;
     allDrinks.push(this);
+}
+Drink.prototype.renderTable=function(){
+    let tr=document.createElement("tr");
+    tableEl.appendChild(tr);
+     
+    let nameTd=document.createElement("td");
+    nameTd.textContent=this.name;
+    tr.appendChild(nameTd);
+
+    let priceTd=document.createElement("td");
+    priceTd.textContent=this.price;
+    tr.appendChild(priceTd);
 }
 Drink.prototype.render=function(){
     // console.log(this.name);
@@ -49,8 +63,63 @@ let hotchoclate = new Drink("hot choclate",["milk" , "coffee", "ice", "sugar"], 
 //mocha.render();
 //console.log(allDrinks);
 
+//renderAll();
+
+function renderAll(){
 for (let i = 0;  i < allDrinks.length; i++) {
     allDrinks[i].render();  // this call function render
+    allDrinks[i].renderTable();
+   
+}
+}
 
+formEl.addEventListener("submit", handleSubmit);
+
+function handleSubmit(event) {
+    // the default behaviour of submitting the form is to refresh the page
+    event.preventDefault();
+
+    console.log("Form event", event);
+    // for text input
+    let drinkName = event.target.drinkName.value
+    let ingredients = event.target.ingredients.value;
+    let image = event.target.image.value;
+    let price = event.target.price.value;
+    // for checkbox input
+    let cold = event.target.cold.checked; // true or false
+    let hot = event.target.hot.checked;
+    // split will conver the string to an array
+    //string: "tea , water"
+    // after split: ["tea", "water"]
+
+    let ingredientsArr = ingredients.split(",");
+    console.log(ingredientsArr);
+
+    // create a new drink
+
+    let newDrink = new Drink(drinkName, ingredientsArr, image, cold, hot, price);
+
+    newDrink.render();
+    saveData(allDrinks);
     
 }
+function saveData(data){
+    let stringfiyData = JSON.stringify(data);
+    localStorage.setItem("Drinks", stringfiyData);
+}
+console.log("before saving it to ls " , allDrinks)
+
+function getData()
+{
+    let retrieveData = localStorage.getItem("Drinks");
+    let arrayData= JSON.parse(retrieveData);
+    if(arrayData != null){
+    for (let i = 0; i < arrayData.length; i++) {
+        new Drink(arrayData[i].name, arrayData[i].ingredients,arrayData[i].image,arrayData[i].isCold , arrayData[i].isHot,arrayData[i].price);
+         renderAll();
+    }
+}
+   // console.log("after retreiving from ls ", allDrinks);
+}
+
+getData();
